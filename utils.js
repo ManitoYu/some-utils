@@ -74,7 +74,11 @@ module.exports = function () {
 
 	function validators() {
 		var funcs = [].slice.call(arguments)
-		return value => funcs.reduce((r, f) => r[0] ? f(value) : r, [true, ''])
+		return (value, on) => {
+			if (isUndefined(on)) on = true
+			if (!on) return [true, '']
+			return funcs.reduce((r, f) => r[0] ? f(value) : r, [true, ''])
+		}
 	}
 
 	function set(o, k, v) {
