@@ -1,4 +1,6 @@
-module.exports = function () {
+module.exports = ($timeout) => {
+	'ngInject'
+
 	function isArray(arr) {
 		if (Array.isArray) {
 			return Array.isArray(arr)
@@ -64,6 +66,10 @@ module.exports = function () {
 		return typeof fn == 'function'
 	}
 
+	function isNull(obj) {
+		return obj === null
+	}
+
 	function validator(fn, err) {
 		return (value, on) => {
 			if (isUndefined(on)) on = true
@@ -87,6 +93,56 @@ module.exports = function () {
 		return o
 	}
 
+	// XXX
+	function memoize(fn, hasher) {
+		var cache = {}
+		if (!isFunction(hasher)) {
+			hasher = function () {
+				var args = [].slice.call(arguments)
+				return args.length ? args[0].toString() : ''
+			}
+		}
+
+		var closure = function (/* args */) {
+			var args = [].slice.call(arguments)
+			var key = hasher.apply(null, args)
+			if (cache.hasOwnProperty(key)) return cache[key]
+			cache[key] = fn(args)
+			return cache[key]
+		}
+
+		closure.clear = () => {
+			cache = {}
+		}
+
+		return closure
+	}
+
+	// XXX
+	function once(fn) {
+		var isCalled = false
+		var result = null
+		return function (/* args */) {
+			if (isCalled) return result
+			var args = [].slice.call(arguments)
+			result = fn(args)
+			return result
+		}
+	}
+
+	// XXX
+	function debounce(fn, wait) {
+		var t = null
+		return function (/* args */) {
+			var args = [].slice.call(arguments)
+			$timeout.cancel(t)
+			t = $timeout(() => {
+				fn.apply(null, args)
+				t = null
+			}, wait)
+		}
+	}
+
 	return {
 		isArray: isArray,
 		unique: unique,
@@ -100,6 +156,7 @@ module.exports = function () {
 		isUndefined: isUndefined,
 		isFunction: isFunction,
 		validator: validator,
-		validators: validators
+		validators: validators,
+		debounce: debounce
 	}
 }
