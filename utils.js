@@ -87,6 +87,11 @@ module.exports = ($timeout) => {
 		}
 	}
 
+	function validate() {
+		var validators = [].slice.call(arguments)
+		return validators.reduce((r, i) => r[0] ? i : r, [true, ''])
+	}
+
 	function set(o, k, v) {
 		// XXX
 		o[k] = v
@@ -143,6 +148,16 @@ module.exports = ($timeout) => {
 		}
 	}
 
+	function inherit(subClass, superClass) {
+		subClass.prototype = Object.create(superClass.prototype)
+		subClass.prototype.constructor = subClass
+		subClass.superClass = superClass
+	}
+
+	function range(start, end) {
+		return Array(end - start).fill().map((v, k) => start + k)
+	}
+
 	return {
 		isArray: isArray,
 		unique: unique,
@@ -157,6 +172,9 @@ module.exports = ($timeout) => {
 		isFunction: isFunction,
 		validator: validator,
 		validators: validators,
-		debounce: debounce
+		debounce: debounce,
+		validate: validate,
+		inherit: inherit,
+		range: range
 	}
 }
